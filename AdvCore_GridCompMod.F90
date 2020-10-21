@@ -963,12 +963,14 @@ contains
                advTracers(N)%content    = TRACERS(:,:,:,N)
             end if
 ! Fill Export States
-            write(myTracer, "('TEST_TRACER',i1.1)") N-1
-            call MAPL_GetPointer(EXPORT, temp3D, TRIM(myTracer), rc=status)
-            VERIFY_(STATUS)
-            if ((associated(temp3D)) .and. (N<=ntracers)) then
-               temp3D = TRACERS(:,:,:,N)
-            endif
+            if (n.le.ntracers) then 
+               write(myTracer, "('TEST_TRACER',i1.1)") N-1
+               call MAPL_GetPointer(EXPORT, temp3D, TRIM(myTracer), rc=status)
+               VERIFY_(STATUS)
+               if ((associated(temp3D)) .and. (N<=ntracers)) then
+                  temp3D = TRACERS(:,:,:,N)
+               endif
+            endif 
          enddo
 
          ! Deallocate the list of tracers
