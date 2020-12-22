@@ -201,7 +201,7 @@ contains
          VLOCATION  = MAPL_VLocationEdge,             RC=STATUS  )
      VERIFY_(STATUS)
 
-    ! GCHP CTM: dry pressure 0 import
+    ! GCHP: add dry pressure 0 import
     call MAPL_AddImportSpec ( gc,                                  &
          SHORT_NAME = 'DryPLE0',                                   &
          LONG_NAME  = 'dry_pressure_at_layer_edges_before_advection',&
@@ -211,7 +211,7 @@ contains
          VLOCATION  = MAPL_VLocationEdge,             RC=STATUS  )
      _VERIFY(STATUS)
 
-    ! GCHP CTM: dry pressure 1 import
+    ! GCHP: add dry pressure 1 import
     call MAPL_AddImportSpec ( gc,                                  &
          SHORT_NAME = 'DryPLE1',                                   &
          LONG_NAME  = 'dry_pressure_at_layer_edges_after_advection',&
@@ -248,7 +248,7 @@ contains
           VLOCATION  = MAPL_VLocationNone,               RC=STATUS  )
      VERIFY_(STATUS)
 
-      ! GCHP CTM: moist pressure export
+      ! GCHP: add moist pressure export
      call MAPL_AddExportSpec ( gc,                                  &
           SHORT_NAME = 'PLE',                                       &
           LONG_NAME  = 'pressure_at_layer_edges',                   &
@@ -258,7 +258,7 @@ contains
           VLOCATION  = MAPL_VLocationEdge,               RC=STATUS  )
      VERIFY_(STATUS)
 
-     ! GCHP CTM: dry pressure export
+     ! GCHP: add dry pressure export
      call MAPL_AddExportSpec ( gc,                                  &
           SHORT_NAME = 'DryPLE',                                    &
           LONG_NAME  = 'dry_pressure_at_layer_edges',               &
@@ -280,7 +280,9 @@ contains
 
 ! 3D Tracers
      do ntracer=1,ntracers
-        write(myTracer, "('TEST_TRACER',i1.1)") ntracer-1
+        ! GCHP: fix string formatting bug caught with debug flags on
+        !write(myTracer, "('TEST_TRACER',i1.1)") ntracer-1
+        write(myTracer, "('TEST_TRACER',i2.2)") ntracer-1
         call MAPL_AddExportSpec ( gc,                             &
              SHORT_NAME = TRIM(myTracer),                         &
              LONG_NAME  = TRIM(myTracer),                         &
@@ -629,10 +631,6 @@ contains
       VERIFY_(STATUS)
       CALL MAPL_GetPointer(IMPORT, iPLE1, 'PLE1', ALLOC = .TRUE., RC=STATUS)
       VERIFY_(STATUS)
-      CALL MAPL_GetPointer(IMPORT, iDryPLE0, 'DryPLE0', ALLOC=.TRUE., RC=STATUS)
-      VERIFY_(STATUS)
-      CALL MAPL_GetPointer(IMPORT, iDryPLE1, 'DryPLE1', ALLOC=.TRUE., RC=STATUS)
-      VERIFY_(STATUS)
       CALL MAPL_GetPointer(IMPORT, iMFX,   'MFX', ALLOC = .TRUE., RC=STATUS)
       VERIFY_(STATUS)
       CALL MAPL_GetPointer(IMPORT, iMFY,   'MFY', ALLOC = .TRUE., RC=STATUS)
@@ -642,6 +640,12 @@ contains
       CALL MAPL_GetPointer(IMPORT, iCY,     'CY', ALLOC = .TRUE., RC=STATUS)
       VERIFY_(STATUS)
       CALL MAPL_GetPointer(IMPORT, iSPHU0,'SPHU0', ALLOC = .TRUE., RC=STATUS)
+      VERIFY_(STATUS)
+
+      ! GCHP: get pointer to dry pressures 
+      CALL MAPL_GetPointer(IMPORT, iDryPLE0, 'DryPLE0', ALLOC=.TRUE., RC=STATUS)
+      VERIFY_(STATUS)
+      CALL MAPL_GetPointer(IMPORT, iDryPLE1, 'DryPLE1', ALLOC=.TRUE., RC=STATUS)
       VERIFY_(STATUS)
 
       ALLOCATE( PLE0(IM,JM,LM+1) )
@@ -657,8 +661,8 @@ contains
 
       PLE0 = iPLE0
       PLE1 = iPLE1
-      DryPLE0 = iDryPLE0 ! GCHP only
-      DryPLE1 = iDryPLE1 ! GCHP only
+      DryPLE0 = iDryPLE0 ! GCHP
+      DryPLE1 = iDryPLE1 ! GCHP
        MFX = iMFX
        MFY = iMFY
         CX = iCX
@@ -980,8 +984,9 @@ contains
 
       end if ! NQ > 0
 
-      ! GCHP only: update dry and wet pressure edge exports
-      call MAPL_GetPointer ( EXPORT, eDryPLE, 'DryPLE', ALLOC=.TRUE., RC=STATUS )
+      ! GCHP: update dry and wet pressure edge exports
+      call MAPL_GetPointer ( EXPORT, eDryPLE, 'DryPLE', ALLOC=.TRUE., &
+                             RC=STATUS )
       _VERIFY(STATUS)
       eDryPLE(:,:,:) = DryPLE1(:,:,:)
       call MAPL_GetPointer ( EXPORT, ePLE, 'PLE', ALLOC=.TRUE., RC=STATUS )
